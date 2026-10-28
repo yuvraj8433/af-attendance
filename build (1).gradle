@@ -2,40 +2,42 @@ plugins {
     id 'com.android.application'
 }
 
-def ksFile = file("release.keystore")
+def ksFile   = file("release.keystore")
+def ksPass   = System.getenv("KEYSTORE_PASSWORD")
+def buildNum = (System.getenv("VERSION_CODE") ?: "1") as Integer
 
 android {
-    namespace 'com.airflow.attendance'
-    compileSdk 34
+    namespace = 'com.airflow.attendance'
+    compileSdk = 34
 
     defaultConfig {
-        applicationId 'com.airflow.attendance'
-        minSdk 26
-        targetSdk 34
-        versionCode (System.getenv("VERSION_CODE") ?: "1").toInteger()
-        versionName "1.0." + (System.getenv("VERSION_CODE") ?: "1")
+        applicationId = 'com.airflow.attendance'
+        minSdk = 26
+        targetSdk = 34
+        versionCode = buildNum
+        versionName = "1.0." + buildNum
     }
 
     signingConfigs {
         release {
-            if (ksFile.exists()) {
-                storeFile ksFile
-                storePassword System.getenv("KEYSTORE_PASSWORD")
-                keyAlias "airflow"
-                keyPassword System.getenv("KEYSTORE_PASSWORD")
+            if (ksFile.exists() && ksPass) {
+                storeFile = ksFile
+                storePassword = ksPass
+                keyAlias = "airflow"
+                keyPassword = ksPass
             }
         }
     }
 
     buildTypes {
         release {
-            minifyEnabled false
-            signingConfig signingConfigs.release
+            minifyEnabled = false
+            signingConfig = signingConfigs.release
         }
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 }

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AF Attendance</string>
+    <!-- Production par shift karna ho to sirf ye URL badlo -->
+    <string name="site_url" translatable="false">https://airflow-staging.frappe.cloud</string>
+</resources>

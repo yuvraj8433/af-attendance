@@ -14,6 +14,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Arrange project files
+        run: |
+          set -e
+          if [ -f app/src/main/AndroidManifest.xml ]; then echo "Structure already sahi hai"; exit 0; fi
+          echo "Flat upload mila — folders bana raha hoon"
+          M=app/src/main
+          mkdir -p $M/java/com/airflow/attendance $M/assets $M/res/values $M/res/drawable $M/res/mipmap-anydpi-v26 _tmp
+          for f in build*.gradle; do
+            [ -f "$f" ] || continue
+            if grep -q "apply false" "$f"; then cp "$f" _tmp/root.gradle; else cp "$f" _tmp/app.gradle; fi
+          done
+          [ -f _tmp/root.gradle ] || { echo "::error::Root build.gradle (apply false wala) nahi mila"; exit 1; }
+          [ -f _tmp/app.gradle ]  || { echo "::error::App build.gradle (namespace wala) nahi mila"; exit 1; }
+          cp _tmp/root.gradle build.gradle
+          cp _tmp/app.gradle app/build.gradle
+          need() { [ -f "$1" ] || { echo "::error::$1 repo mein nahi mili"; exit 1; }; cp "$1" "$2"; }
+          need AndroidManifest.xml          $M/AndroidManifest.xml
+          need MainActivity.java            $M/java/com/airflow/attendance/MainActivity.java
+          need attendance.js                $M/assets/attendance.js
+          need strings.xml                  $M/res/values/strings.xml
+          need colors.xml                   $M/res/values/colors.xml
+          need ic_launcher_foreground.xml   $M/res/drawable/ic_launcher_foreground.xml
+          need ic_launcher.xml              $M/res/mipmap-anydpi-v26/ic_launcher.xml
+          [ -f settings.gradle ] || { echo "::error::settings.gradle repo mein nahi mili"; exit 1; }
+          echo "Final structure:"; find app -type f | sort
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
